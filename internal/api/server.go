@@ -83,7 +83,7 @@ func (s *Server) handleCreateTarget(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.ID = id.String()
 	s.st.AddTarget(resp)
-	writeJSON(w, http.StatusOK, resp) // 200
+	writeJSON(w, http.StatusCreated, resp) // 200
 }
 
 // GET /targets
