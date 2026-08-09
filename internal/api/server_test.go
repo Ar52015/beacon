@@ -199,7 +199,7 @@ func TestTargetResultsAndStats(t *testing.T) {
 		t.Fatalf("Wrong status code recieved\nexpected: %d\nrecieved: %d", 200, rec.Code)
 	}
 	// Recieved Body
-	var statsRecieved statsResponse
+	var statsRecieved store.StatsResponse
 	if err := json.NewDecoder(rec.Body).Decode(&statsRecieved); err != nil {
 		t.Fatalf("Error during decoding request body: %v", err)
 	}

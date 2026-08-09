@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"log/slog"
-	"math"
 	"net/http"
-	"slices"
 	"time"
 
 	"github.com/Ar52015/beacon/internal/store"
@@ -15,20 +13,6 @@ import (
 type Server struct {
 	st    *store.Store
 	token string
-}
-
-type statsResponse struct {
-	Count int `json:"count"`
-	P50   int `json:"p50_ms"`
-	P90   int `json:"p90_ms"`
-	P95   int `json:"p95_ms"`
-	P99   int `json:"p99_ms"`
-}
-
-func percentile(sorted []int, p float64) int {
-	N := float64(len(sorted))
-	res := math.Ceil((p / 100) * N)
-	return sorted[int(res)-1]
 }
 
 func NewServer(st *store.Store, token string) *Server {
@@ -167,24 +151,7 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t := s.st.ListResults(id)
-
-	if len(t) == 0 {
-		writeJSON(w, http.StatusOK, statsResponse{}) // 200
-		return
-	}
-
-	sorted := make([]int, 0, len(t))
-	for _, i := range t {
-		sorted = append(sorted, i.LatencyMs)
-	}
-	slices.Sort(sorted)
-	resp := statsResponse{Count: len(t)}
-	resp.P50 = percentile(sorted, 50)
-	resp.P90 = percentile(sorted, 90)
-	resp.P95 = percentile(sorted, 95)
-	resp.P99 = percentile(sorted, 99)
-
+	resp := s.st.LatencyStats(id)
 	writeJSON(w, http.StatusOK, resp) // 200
 }
 

@@ -12,6 +12,8 @@ import (
 	"github.com/Ar52015/beacon/internal/api"
 	"github.com/Ar52015/beacon/internal/config"
 	"github.com/Ar52015/beacon/internal/store"
+
+	_ "net/http/pprof"
 )
 
 func main() {
@@ -28,9 +30,17 @@ func main() {
 	st := store.NewStore()
 	ser := api.NewServer(st, conf.Token)
 	srv := &http.Server{
-		Addr:    conf.Addr,
-		Handler: ser.Routes(),
+		Addr:     conf.Addr,
+		Handler:  ser.Routes(),
+		ErrorLog: slog.NewLogLogger(slog.Default().Handler(), slog.LevelError),
 	}
+
+	// pprof
+	go func() {
+		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+			slog.Error("pprof server failed", "err", err)
+		}
+	}()
 
 	// graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
