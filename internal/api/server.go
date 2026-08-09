@@ -23,8 +23,6 @@ func (s *Server) Routes() http.Handler {
 	servemux := http.NewServeMux()
 
 	servemux.HandleFunc("GET /healthz", s.handleHealthz)
-	servemux.HandleFunc("GET /slow", s.handleTestSlowFail)
-	servemux.HandleFunc("GET /slow200", s.handleTestSlowPass)
 	servemux.HandleFunc("POST /targets", s.handleCreateTarget)
 	servemux.HandleFunc("GET /targets", s.handleListTargets)
 	servemux.HandleFunc("GET /targets/{id}", s.handleGetTarget)
@@ -32,6 +30,9 @@ func (s *Server) Routes() http.Handler {
 	servemux.HandleFunc("POST /targets/{id}/results", s.handleAddResult)
 	servemux.HandleFunc("GET /targets/{id}/results", s.handleListResults)
 	servemux.HandleFunc("GET /targets/{id}/stats", s.handleStats)
+	// servemux.HandleFunc("GET /leak", s.handleTestLeak)
+	// servemux.HandleFunc("GET /slow", s.handleTestSlowFail)
+	// servemux.HandleFunc("GET /slow200", s.handleTestSlowPass)
 
 	return logging(auth(s.token)(servemux))
 }
@@ -155,17 +156,26 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp) // 200
 }
 
-// GET /slow <TEST ENDPOINT CASE: FAIL>
-func (s *Server) handleTestSlowFail(w http.ResponseWriter, _ *http.Request) {
-	time.Sleep(30 * time.Second)
-	if _, err := w.Write([]byte("Slow endpoint test complete!")); err != nil {
-		slog.Error("write failed", "err", err)
-	}
-}
-
-// GET /slow200	<TEST ENDPOINT CASE: SUCCESS>
-func (s *Server) handleTestSlowPass(w http.ResponseWriter, _ *http.Request) {
-	time.Sleep(5 * time.Second)
-	resp := "Slow endpoint test complete!"
-	writeJSON(w, http.StatusOK, resp) // 200
-}
+// // GET /slow <TEST ENDPOINT CASE: FAIL>
+// func (s *Server) handleTestSlowFail(w http.ResponseWriter, _ *http.Request) {
+// 	time.Sleep(30 * time.Second)
+// 	if _, err := w.Write([]byte("Slow endpoint test complete!")); err != nil {
+// 		slog.Error("write failed", "err", err)
+// 	}
+// }
+//
+// // GET /slow200	<TEST ENDPOINT CASE: SUCCESS>
+// func (s *Server) handleTestSlowPass(w http.ResponseWriter, _ *http.Request) {
+// 	time.Sleep(5 * time.Second)
+// 	resp := "Slow endpoint test complete!"
+// 	writeJSON(w, http.StatusOK, resp) // 200
+// }
+//
+// // GET /leak <TEST ENDPOINT CASE: GOROUTINE LEAK>
+// func (s *Server) handleTestLeak(w http.ResponseWriter, _ *http.Request) {
+// 	ch := make(chan struct{})
+// 	go func() {
+// 		<-ch
+// 	}()
+// 	w.WriteHeader(http.StatusOK) // 200
+// }
