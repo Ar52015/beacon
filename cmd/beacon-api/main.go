@@ -36,11 +36,11 @@ func main() {
 	}
 
 	// pprof
-	go func() {
-		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
-			slog.Error("pprof server failed", "err", err)
-		}
-	}()
+	// go func() {
+	// 	if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+	// 		slog.Error("pprof server failed", "err", err)
+	// 	}
+	// }()
 
 	// graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
