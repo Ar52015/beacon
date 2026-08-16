@@ -32,6 +32,7 @@ type Result struct {
 	LatencyMs int       `json:"latency_ms"`
 	OK        bool      `json:"ok"`
 	Error     string    `json:"error,omitempty"`
+	Info      string    `json:"info,omitempty"`
 }
 
 type StatsResponse struct {
